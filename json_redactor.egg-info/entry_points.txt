@@ -1,0 +1,2 @@
+[console_scripts]
+json-redactor = json_redactor.__main__:main

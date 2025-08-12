@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+json_redactor/__init__.py
+json_redactor/__main__.py
+json_redactor/core.py
+json_redactor.egg-info/PKG-INFO
+json_redactor.egg-info/SOURCES.txt
+json_redactor.egg-info/dependency_links.txt
+json_redactor.egg-info/entry_points.txt
+json_redactor.egg-info/requires.txt
+json_redactor.egg-info/top_level.txt

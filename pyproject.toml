@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "json-redactor"
+version = "0.1.0"
+description = "Stream-safe JSON redaction/hasher CLI that preserves structure and key order"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["ijson>=3.2.3"]
+
+[project.scripts]
+json-redactor = "json_redactor.__main__:main"

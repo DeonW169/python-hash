@@ -1,10 +1,18 @@
+Metadata-Version: 2.4
+Name: json-redactor
+Version: 0.1.0
+Summary: Stream-safe JSON redaction/hasher CLI that preserves structure and key order
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ijson>=3.2.3
+
 # JSON Redactor
 
 A small command‑line tool that **redacts** or **hashes** sensitive values in an arbitrarily nested JSON document while preserving the document’s structure and key order. Designed to be **stream‑safe** for very large files (500MB+), using an incremental parser.
 
 ## Features
 
-- CLI entry point: `json-redactor`
+- CLI entry point: `json-redactor` (or `python -m json_redactor`)
 - Input: file path or `stdin`
 - Sensitive keys: via `--keys email,password,ssn` **and/or** `--key-file`
 - Case‑insensitive key matching
@@ -12,33 +20,31 @@ A small command‑line tool that **redacts** or **hashes** sensitive values in a
   - `--mask` (default) → replace with `"***REDACTED***"`
   - `--hash` → replace with deterministic **SHA‑256 hex** of the original value
 - Preserves structure and original key order
-- Streaming‑safe using `ijson`
+- Streaming‑safe using `ijson` events (does not load the whole file)
 - Exit codes: `0` on success, non‑zero on errors
 
 **Stretch options**
 - `--keys-regex` (comma‑separated) to match keys by regex (case‑insensitive)
 - `--pretty` optional pretty printed output (otherwise compact)
 
-## Install and Run
+## Install
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -U pip
 pip install -e .
+# or build a wheel: pip wheel .
 ```
 
-> Requires Python 3.8+
-> Version used: Python 3.13.1
+> Requires Python 3.8+.
 
-## Example Usage
+## Usage
 
 ```bash
 # read from file, hash emails and ssn
 json-redactor --keys email,ssn --hash people.json > out.json
 
 # read from stdin, mask passwords by default
-cat people.json | json-redactor --keys password > masked.json
+cat dump.json | json-redactor --keys password > masked.json
 
 # keys from file (one per line), combine with inline list, pretty print
 json-redactor --key-file keys.txt --keys ssn --pretty big.json > out.json
@@ -47,9 +53,22 @@ json-redactor --key-file keys.txt --keys ssn --pretty big.json > out.json
 json-redactor --keys-regex "(?i)^credit.*|card$" data.json > out.json
 ```
 
+## Notes on hashing
+
+- For **scalars**, we hash their canonical JSON representation (e.g., `"true"`, `null`, numbers as written).
+- For **objects/arrays** under a sensitive key, we hash a **canonical JSON** form reconstructed from the parse events (whitespace‑free, stable ordering of keys as read from the input).  
+  This keeps hashing deterministic without holding the whole subtree in memory.
+
+## Development
+
+```bash
+# run unit smoke test on example
+python -m json_redactor --keys email,ssn --hash examples/people.json
+```
+
 ## Examples
 
-`people.json`:
+`examples/people.json`:
 
 ```json
 [
@@ -61,7 +80,7 @@ json-redactor --keys-regex "(?i)^credit.*|card$" data.json > out.json
 Command:
 
 ```bash
-cat people.json | json-redactor --keys email,ssn --hash --pretty
+cat examples/people.json | json-redactor --keys email,ssn --hash --pretty
 ```
 
 Output (truncated hashes):
